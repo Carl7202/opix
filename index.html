@@ -48,7 +48,7 @@
     <p id="auth-subtitle">A simple place to talk.</p>
     <div id="auth-notice" class="notice hidden" role="status"></div>
     <form id="auth-form">
-      <div class="field hidden" id="username-field"><label for="auth-username">Username</label><input id="auth-username" autocomplete="username" minlength="3" maxlength="20" placeholder="your_username"></div>
+      <div class="field hidden" id="display-name-field"><label for="auth-display-name">Display name</label><input id="auth-display-name" autocomplete="nickname" minlength="1" maxlength="32" placeholder="Your display name"></div>
       <div class="field"><label for="auth-email">Email</label><input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com"></div>
       <div class="field"><label for="auth-password">Password</label><input id="auth-password" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters"></div>
       <button class="primary wide" id="auth-submit" type="submit">Sign in</button>
@@ -67,7 +67,7 @@
       <button data-page="settings"><span class="nav-icon">⚙</span><span class="nav-text">Settings</span></button>
     </nav>
     <div class="sidebar-bottom">
-      <div class="profile-mini"><div class="avatar" id="side-avatar">?</div><div class="profile-copy"><div class="name" id="side-name">you</div><div class="handle" id="side-handle">@username</div></div></div>
+      <div class="profile-mini"><div class="avatar" id="side-avatar">?</div><div class="profile-copy"><div class="name" id="side-name">you</div><div class="handle" id="side-handle">@display_name</div></div></div>
     </div>
   </aside>
   <main class="main">
@@ -93,20 +93,20 @@ function notice(message, kind='') { const el=$('#auth-notice'); el.textContent=m
 function clearNotice(){ $('#auth-notice').classList.add('hidden'); }
 function showAuth(mode='signin') {
   state.authMode=mode; $('#auth-screen').classList.remove('hidden'); $('#app').classList.add('hidden'); clearNotice();
-  const signup=mode==='signup'; $('#auth-title').textContent=signup?'Create your account.':'Welcome back.'; $('#auth-subtitle').textContent=signup?'Pick a username and get chatting.':'A simple place to talk.';
-  $('#username-field').classList.toggle('hidden',!signup); $('#auth-submit').textContent=signup?'Create account':'Sign in'; $('#auth-switch-copy').textContent=signup?'Already have an account?':'New to opix?'; $('#auth-switch').textContent=signup?'Sign in':'Create an account';
+  const signup=mode==='signup'; $('#auth-title').textContent=signup?'Create your account.':'Welcome back.'; $('#auth-subtitle').textContent=signup?'Pick a display_name and get chatting.':'A simple place to talk.';
+  $('#display-name-field').classList.toggle('hidden',!signup); $('#auth-submit').textContent=signup?'Create account':'Sign in'; $('#auth-switch-copy').textContent=signup?'Already have an account?':'New to opix?'; $('#auth-switch').textContent=signup?'Sign in':'Create an account';
   $('#auth-password').autocomplete=signup?'new-password':'current-password';
 }
 $('#auth-switch').addEventListener('click',()=>showAuth(state.authMode==='signin'?'signup':'signin'));
 $('#auth-form').addEventListener('submit',async e=>{
   e.preventDefault(); clearNotice();
-  const email=$('#auth-email').value.trim(), password=$('#auth-password').value, username=$('#auth-username').value.trim().toLowerCase();
+  const email=$('#auth-email').value.trim(), password=$('#auth-password').value, display_name=$('#auth-display-name').value.trim();
   const button=$('#auth-submit'); button.disabled=true;
   try {
     if(state.authMode==='signup'){
-      if(!/^[a-z0-9_]{3,20}$/.test(username)) throw new Error('Username must be 3–20 characters: letters, numbers or underscores.');
+      if(!/^[a-z0-9_]{3,20}$/.test(display_name)) throw new Error('Display name must be between 1 and 32 characters.');
       if(password.length<8) throw new Error('Use a password with at least 8 characters.');
-      const {data,error}=await supabase.auth.signUp({email,password,options:{data:{username}}});
+      const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name}}});
       if(error) throw error;
       if(data.session){ await startApp(data.session.user); }
       else notice('Account created. Check your email to confirm it, then sign in.','success');
@@ -124,19 +124,19 @@ async function startApp(user){
   $('#auth-screen').classList.add('hidden'); $('#app').classList.remove('hidden');
   await loadProfile();
   if(!state.profile){ await supabase.auth.signOut(); showAuth('signin'); notice('Your profile is still being created. Try signing in again in a moment.'); return; }
-  $('#side-name').textContent=state.profile.username; $('#side-handle').textContent='@'+state.profile.username; $('#side-avatar').textContent=initials(state.profile.username);
+  $('#side-name').textContent=state.profile.display_name; $('#side-handle').textContent=''; $('#side-avatar').textContent=initials(state.profile.display_name);
   await refreshData();
   subscribeRealtime();
   state.page='messages'; render();
   heartbeat();
 }
 async function loadProfile(){
-  const {data,error}=await supabase.from('profiles').select('id,username,last_seen').eq('id',state.user.id).maybeSingle();
+  const {data,error}=await supabase.from('profiles').select('id,display_name,last_seen').eq('id',state.user.id).maybeSingle();
   if(error) throw error; state.profile=data;
 }
 async function refreshData(){
   const [profilesRes,requestsRes,convosRes]=await Promise.all([
-    supabase.from('profiles').select('id,username,last_seen'),
+    supabase.from('profiles').select('id,display_name,last_seen'),
     supabase.from('friend_requests').select('*').or('sender_id.eq.'+state.user.id+',receiver_id.eq.'+state.user.id),
     supabase.from('conversations').select('*').or('participant_1.eq.'+state.user.id+',participant_2.eq.'+state.user.id).order('created_at',{ascending:false})
   ]);
@@ -197,12 +197,12 @@ function renderMessagesPage(){
     content.innerHTML='<div class="welcome"><div class="welcome-inner"><div class="welcome-mark">✉</div><h1>Your chats start here.</h1><p>Add a friend and send your first message. No clutter, just conversations.</p><button class="primary" id="go-friends">Find friends</button></div></div>';
     $('#go-friends').onclick=()=>{state.page='friends';render();}; return;
   }
-  const list=state.conversations.map(c=>`<div class="chat-entry ${state.selected?.id===c.id?'active':''}" data-chat="${c.id}"><div class="avatar">${initials(c.person.username)}</div><div class="entry-copy"><div class="entry-title">${escapeHTML(c.person.username)}</div><div class="entry-preview">${escapeHTML(c.last?.body||'Start a conversation')}</div></div><span class="entry-time small muted">${timeShort(c.last?.created_at)}</span></div>`).join('');
+  const list=state.conversations.map(c=>`<div class="chat-entry ${state.selected?.id===c.id?'active':''}" data-chat="${c.id}"><div class="avatar">${initials(c.person.display_name)}</div><div class="entry-copy"><div class="entry-title">${escapeHTML(c.person.display_name)}</div><div class="entry-preview">${escapeHTML(c.last?.body||'Start a conversation')}</div></div><span class="entry-time small muted">${timeShort(c.last?.created_at)}</span></div>`).join('');
   let thread='';
   if(state.selected){
     const person=state.selected.person;
     const msgs=state.messages.map(m=>`<div class="message ${m.sender_id===state.user.id?'mine':''}">${escapeHTML(m.body)}<div class="message-meta">${timeShort(m.created_at)}</div></div>`).join('');
-    thread=`<div class="chat-head"><div class="person"><div class="avatar">${initials(person.username)}</div><div><div class="person-name">${escapeHTML(person.username)}</div><div class="person-sub">${online(person.last_seen)?'<span class="accent">● online</span>':'last seen '+timeShort(person.last_seen)}</div></div></div></div><div class="chat-messages" id="chat-messages">${msgs||'<div class="empty-small">Say hello 👋</div>'}</div><form class="message-form" id="message-form"><textarea class="message-input" id="message-body" rows="1" maxlength="4000" placeholder="Write a message…"></textarea><button class="primary send-btn" type="submit" aria-label="Send message">➤</button></form>`;
+    thread=`<div class="chat-head"><div class="person"><div class="avatar">${initials(person.display_name)}</div><div><div class="person-name">${escapeHTML(person.display_name)}</div><div class="person-sub">${online(person.last_seen)?'<span class="accent">● online</span>':'last seen '+timeShort(person.last_seen)}</div></div></div></div><div class="chat-messages" id="chat-messages">${msgs||'<div class="empty-small">Say hello 👋</div>'}</div><form class="message-form" id="message-form"><textarea class="message-input" id="message-body" rows="1" maxlength="4000" placeholder="Write a message…"></textarea><button class="primary send-btn" type="submit" aria-label="Send message">➤</button></form>`;
   }else thread='<div class="welcome"><div class="welcome-inner"><div class="welcome-mark">✦</div><h1>Pick a conversation.</h1><p>Your messages will show up here.</p></div></div>';
   content.innerHTML=`<div class="chat-layout"><aside class="chat-list"><div class="chat-list-head"><h3>Chats</h3><input class="search-input" id="chat-filter" placeholder="Search chats…"></div><div class="chat-list-items" id="chat-list-items">${list}</div></aside><section class="chat-window">${thread}</section></div>`;
   document.querySelectorAll('[data-chat]').forEach(el=>el.addEventListener('click',()=>{const c=state.conversations.find(x=>x.id===el.dataset.chat);if(c)openConversation(c);}));
@@ -216,29 +216,42 @@ async function sendMessage(e){
   button.disabled=false;if(error){alert(error.message);return;}input.value='';await loadMessages();await refreshData();render();
 }
 function renderFriendsPage(){
-  const incoming=state.incoming.map(r=>`<div class="person-item"><div class="person"><div class="avatar">${initials(r.person?.username)}</div><div><div class="person-name">${escapeHTML(r.person?.username||'Unknown')}</div><div class="person-sub">Wants to connect</div></div></div><div class="row"><button class="primary" data-accept="${r.id}">Accept</button><button class="secondary" data-decline="${r.id}">×</button></div></div>`).join('')||'<div class="empty-small">No new requests.</div>';
-  const friends=state.friends.map(f=>`<div class="person-item"><div class="person"><div class="avatar">${initials(f.person.username)}</div><div><div class="person-name">${escapeHTML(f.person.username)}</div><div class="person-sub">${online(f.person.last_seen)?'<span class="accent">● online</span>':'offline'}</div></div></div><button class="secondary" data-message="${f.person.id}">Message</button></div>`).join('')||'<div class="empty-small">No friends yet. Search for someone above.</div>';
-  const sent=state.sent.map(r=>`<div class="person-item"><div class="person"><div class="avatar">${initials(r.person?.username)}</div><div><div class="person-name">${escapeHTML(r.person?.username||'Unknown')}</div><div class="person-sub">Request sent</div></div></div><span class="small muted">Pending</span></div>`).join('');
-  $('#page-content').innerHTML=`<div class="section-head"><div><h2>Friends</h2><p>Find people and manage your connections.</p></div></div><div class="card"><h3>Add a friend</h3><form class="search-row" id="friend-search"><input class="search-input" id="friend-username" placeholder="Search by username" autocomplete="off"><button class="primary" type="submit">Search</button></form><div id="friend-search-result"></div></div><div class="card"><div class="row-between"><h3>Friend requests</h3><span class="small muted">${state.incoming.length}</span></div><div class="person-list">${incoming}</div></div><div class="card"><div class="row-between"><h3>Your friends</h3><span class="small muted">${state.friends.length}</span></div><div class="person-list">${friends}</div></div>${sent?'<div class="card"><h3>Sent requests</h3><div class="person-list">'+sent+'</div></div>':''}`;
+  const incoming=state.incoming.map(r=>`<div class="person-item"><div class="person"><div class="avatar">${initials(r.person?.display_name)}</div><div><div class="person-name">${escapeHTML(r.person?.display_name||'Unknown')}</div><div class="person-sub">Wants to connect</div></div></div><div class="row"><button class="primary" data-accept="${r.id}">Accept</button><button class="secondary" data-decline="${r.id}">×</button></div></div>`).join('')||'<div class="empty-small">No new requests.</div>';
+  const friends=state.friends.map(f=>`<div class="person-item"><div class="person"><div class="avatar">${initials(f.person.display_name)}</div><div><div class="person-name">${escapeHTML(f.person.display_name)}</div><div class="person-sub">${online(f.person.last_seen)?'<span class="accent">● online</span>':'offline'}</div></div></div><button class="secondary" data-message="${f.person.id}">Message</button></div>`).join('')||'<div class="empty-small">No friends yet. Search for someone above.</div>';
+  const sent=state.sent.map(r=>`<div class="person-item"><div class="person"><div class="avatar">${initials(r.person?.display_name)}</div><div><div class="person-name">${escapeHTML(r.person?.display_name||'Unknown')}</div><div class="person-sub">Request sent</div></div></div><span class="small muted">Pending</span></div>`).join('');
+  $('#page-content').innerHTML=`<div class="section-head"><div><h2>Friends</h2><p>Find people and manage your connections.</p></div></div><div class="card"><h3>Add a friend</h3><form class="search-row" id="friend-search"><input class="search-input" id="friend-display-name" placeholder="Search by display name" autocomplete="off"><button class="primary" type="submit">Search</button></form><div id="friend-search-result"></div></div><div class="card"><div class="row-between"><h3>Friend requests</h3><span class="small muted">${state.incoming.length}</span></div><div class="person-list">${incoming}</div></div><div class="card"><div class="row-between"><h3>Your friends</h3><span class="small muted">${state.friends.length}</span></div><div class="person-list">${friends}</div></div>${sent?'<div class="card"><h3>Sent requests</h3><div class="person-list">'+sent+'</div></div>':''}`;
   $('#friend-search').addEventListener('submit',searchFriend);
   document.querySelectorAll('[data-accept]').forEach(b=>b.onclick=()=>respondRequest(b.dataset.accept,'accepted'));
   document.querySelectorAll('[data-decline]').forEach(b=>b.onclick=()=>respondRequest(b.dataset.decline,'declined'));
   document.querySelectorAll('[data-message]').forEach(b=>b.onclick=async()=>{try{const c=await ensureConversation(b.dataset.message);const p=state.profiles.find(x=>x.id===b.dataset.message);await openConversation({...c,person:p});}catch(e){alert(e.message);}});
 }
 async function searchFriend(e){
-  e.preventDefault();const username=$('#friend-username').value.trim().toLowerCase();const result=$('#friend-search-result');result.innerHTML='';
-  if(!/^[a-z0-9_]{3,20}$/.test(username)){result.innerHTML='<div class="notice">Enter a username using 3–20 letters, numbers or underscores.</div>';return;}
-  const {data,error}=await supabase.from('profiles').select('id,username').eq('username',username).maybeSingle();
+  e.preventDefault();
+  const term=$('#friend-display-name').value.trim();
+  const result=$('#friend-search-result');
+  result.innerHTML='';
+  if(term.length<2){result.innerHTML='<div class="notice">Type at least 2 characters to search.</div>';return;}
+  const {data,error}=await supabase.from('profiles').select('id,display_name,last_seen').ilike('display_name','%'+term+'%').limit(12);
   if(error){result.innerHTML='<div class="notice error">'+escapeHTML(error.message)+'</div>';return;}
-  if(!data){result.innerHTML='<div class="empty-small">No user found with that username.</div>';return;}
-  if(data.id===state.user.id){result.innerHTML='<div class="empty-small">That is your account.</div>';return;}
-  const existing=(await supabase.from('friend_requests').select('*').or('and(sender_id.eq.'+state.user.id+',receiver_id.eq.'+data.id+'),and(sender_id.eq.'+data.id+',receiver_id.eq.'+state.user.id+')')).data||[];
-  if(existing.some(r=>r.status==='accepted')){result.innerHTML='<div class="notice success">You are already friends.</div>';return;}
-  if(existing.some(r=>r.status==='pending'&&r.receiver_id===state.user.id)){result.innerHTML='<div class="notice">This person has already sent you a request — accept it below.</div>';return;}
-  if(existing.some(r=>r.status==='pending')){result.innerHTML='<div class="notice">A request is already pending.</div>';return;}
-  result.innerHTML=`<div class="person-item"><div class="person"><div class="avatar">${initials(data.username)}</div><div><div class="person-name">${escapeHTML(data.username)}</div><div class="person-sub">opix user</div></div></div><button class="primary" id="send-request">Add friend</button></div>`;
-  $('#send-request').onclick=async()=>{const {error}=await supabase.from('friend_requests').insert({sender_id:state.user.id,receiver_id:data.id});if(error){result.innerHTML='<div class="notice error">'+escapeHTML(error.message)+'</div>';return;}result.innerHTML='<div class="notice success">Friend request sent.</div>';await refreshData();};
+  const people=(data||[]).filter(p=>p.id!==state.user.id);
+  if(!people.length){result.innerHTML='<div class="empty-small">No matching display names found.</div>';return;}
+  result.innerHTML=people.map(p=>{
+    const isFriend=state.friends.some(f=>f.person.id===p.id);
+    const hasIncoming=state.incoming.some(r=>r.sender_id===p.id);
+    const hasSent=state.sent.some(r=>r.receiver_id===p.id);
+    const label=isFriend?'Friends':hasIncoming?'Request received':hasSent?'Request sent':'Add friend';
+    const disabled=isFriend||hasIncoming||hasSent;
+    return `<div class="person-item"><div class="person"><div class="avatar">${initials(p.display_name)}</div><div><div class="person-name">${escapeHTML(p.display_name)}</div><div class="person-sub">opix user</div></div></div><button class="primary" data-add-friend="${p.id}" ${disabled?'disabled':''}>${label}</button></div>`;
+  }).join('');
+  result.querySelectorAll('[data-add-friend]').forEach(button=>button.onclick=async()=>{
+    button.disabled=true;
+    const {error}=await supabase.from('friend_requests').insert({sender_id:state.user.id,receiver_id:button.dataset.addFriend});
+    if(error){button.disabled=false;button.textContent='Try again';const note=document.createElement('div');note.className='notice error';note.textContent=error.message;result.prepend(note);return;}
+    button.textContent='Request sent';
+    await refreshData();
+  });
 }
+
 async function respondRequest(id,status){
   const {error}=await supabase.from('friend_requests').update({status,updated_at:new Date().toISOString()}).eq('id',id);
   if(error){alert(error.message);return;}
@@ -248,15 +261,15 @@ async function respondRequest(id,status){
   await refreshData();render();
 }
 function renderSettingsPage(){
-  $('#page-content').innerHTML=`<div class="section-head"><div><h2>Settings</h2><p>Your account details.</p></div></div><div class="card settings-grid"><h3>Profile</h3><div class="field"><label>Email</label><input value="${escapeHTML(state.user.email||'')}" disabled></div><form id="profile-form"><div class="field"><label for="settings-username">Username</label><input id="settings-username" value="${escapeHTML(state.profile.username)}" minlength="3" maxlength="20" required></div><button class="primary" type="submit">Save changes</button></form><div class="notice hidden" id="settings-notice"></div></div><div class="card settings-grid"><h3>Account</h3><p class="muted small">Signed in as @${escapeHTML(state.profile.username)}.</p><button class="secondary" id="sign-out">Sign out</button></div>`;
+  $('#page-content').innerHTML=`<div class="section-head"><div><h2>Settings</h2><p>Your account details.</p></div></div><div class="card settings-grid"><h3>Profile</h3><div class="field"><label>Email</label><input value="${escapeHTML(state.user.email||'')}" disabled></div><form id="profile-form"><div class="field"><label for="settings-display-name">Display name</label><input id="settings-display-name" value="${escapeHTML(state.profile.display_name)}" minlength="1" maxlength="32" required></div><button class="primary" type="submit">Save changes</button></form><div class="notice hidden" id="settings-notice"></div></div><div class="card settings-grid"><h3>Account</h3><p class="muted small">Display name: ${escapeHTML(state.profile.display_name)}.</p><button class="secondary" id="sign-out">Sign out</button></div>`;
   $('#profile-form').addEventListener('submit',saveProfile);$('#sign-out').onclick=async()=>{if(state.channel)await supabase.removeChannel(state.channel);await supabase.auth.signOut();state.user=null;state.profile=null;state.selected=null;showAuth('signin');};
 }
 async function saveProfile(e){
-  e.preventDefault();const username=$('#settings-username').value.trim().toLowerCase();const note=$('#settings-notice');note.classList.remove('hidden');note.className='notice';
-  if(!/^[a-z0-9_]{3,20}$/.test(username)){note.textContent='Username must be 3–20 letters, numbers or underscores.';return;}
-  const {error}=await supabase.from('profiles').update({username}).eq('id',state.user.id);
-  if(error){note.className='notice error';note.textContent=error.code==='23505'?'That username is already taken.':error.message;return;}
-  state.profile.username=username;$('#side-name').textContent=username;$('#side-handle').textContent='@'+username;$('#side-avatar').textContent=initials(username);note.className='notice success';note.textContent='Saved.';
+  e.preventDefault();const display_name=$('#settings-display-name').value.trim();const note=$('#settings-notice');note.classList.remove('hidden');note.className='notice';
+  if(display_name.length<1 || display_name.length>32){note.textContent='Display name must be between 1 and 32 characters.';return;}
+  const {error}=await supabase.from('profiles').update({display_name}).eq('id',state.user.id);
+  if(error){note.className='notice error';note.textContent=error.code==='23505'?'That display_name is already taken.':error.message;return;}
+  state.profile.display_name=display_name;$('#side-name').textContent=display_name;$('#side-handle').textContent='@'+display_name;$('#side-avatar').textContent=initials(display_name);note.className='notice success';note.textContent='Saved.';
 }
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{state.page=b.dataset.page;render();}));
 supabase.auth.getSession().then(({data})=>{if(data.session)startApp(data.session.user).catch(e=>{console.error(e);showAuth('signin');notice(e.message);});else showAuth('signin');});
