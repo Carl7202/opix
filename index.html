@@ -147,7 +147,7 @@ function renderText(){
   $('#page-title').textContent='# '+c.name;
   const messages=state.messages.map(m=>'<div class="message-row"><div class="avatar">'+esc(initials(m.display_name))+'</div><div class="message-copy"><div class="message-author">'+esc(m.display_name)+'<span class="message-time">'+timeShort(m.created_at)+'</span></div><div class="message-body">'+esc(m.body)+'</div></div></div>').join('');
   $('#page-content').innerHTML='<div class="chat-messages" id="chat-messages">'+(messages||'<div class="empty-state"><div><strong>Welcome to #'+esc(c.name)+'</strong>This is the start of this channel. Say something!</div></div>')+'</div>';
-  $('#page-content').scrollTop=$('#page-content').scrollHeight;
+  const messageBox=$('#chat-messages');messageBox.scrollTop=messageBox.scrollHeight;
   const form=document.createElement('div');form.className='composer-wrap';form.innerHTML='<form class="message-form" id="message-form"><textarea class="message-input" id="message-body" rows="1" maxlength="4000" placeholder="Message #'+esc(c.name)+'"></textarea><button class="primary send-btn" type="submit">➤</button></form>';
   $('#page-content').appendChild(form);
   $('#message-form').addEventListener('submit',sendMessage);
