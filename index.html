@@ -4,265 +4,291 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#111018">
-<title>opix — simple chat</title>
+<title>opix — one community</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
-:root{color-scheme:dark;--bg:#0e0d13;--panel:#15141d;--panel2:#1b1a25;--line:#292735;--text:#f4f1fb;--muted:#9692a5;--accent:#9b7bff;--accent2:#7957ed;--green:#4bd49a;--red:#ff727e}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}a{color:inherit}
-.hidden{display:none!important}.muted{color:var(--muted)}.small{font-size:12px}.accent{color:var(--accent)}
-#auth-screen{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,#30224f 0,transparent 48%),var(--bg)}
-.auth-card{width:min(420px,100%);background:#17151f;border:1px solid var(--line);border-radius:22px;padding:32px;box-shadow:0 25px 90px #0007}
-.brand{display:flex;align-items:center;gap:10px;font-size:23px;font-weight:800;letter-spacing:-1px}.brand-mark{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#b29bff,#7650ed);display:grid;place-items:center;color:#fff;font-weight:900}
-.auth-card h1{font-size:25px;margin:30px 0 6px;letter-spacing:-.7px}.auth-card p{margin:0 0 24px;color:var(--muted)}
-.field{display:grid;gap:7px;margin:14px 0}.field label{font-size:13px;color:#c9c5d4}.field input,.search-input,.message-input{width:100%;border:1px solid var(--line);background:#100f16;color:var(--text);border-radius:10px;padding:12px 13px;outline:none}.field input:focus,.search-input:focus,.message-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #9b7bff20}
-.primary,.secondary,.danger{border:0;border-radius:10px;padding:11px 15px;font-weight:700}.primary{background:var(--accent);color:#130d22}.primary:hover{background:#b29cff}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{background:#51252c;color:#ffdce0}.wide{width:100%;margin-top:12px}
-.auth-switch{display:flex;gap:8px;margin-top:18px;justify-content:center;color:var(--muted);font-size:13px}.link-btn{border:0;background:none;color:var(--accent);padding:0;font-weight:700}
-.notice{padding:10px 12px;border-radius:10px;background:#242033;color:#d9d0ff;font-size:13px;margin:12px 0}.error{background:#351d26;color:#ffb7c0}.success{background:#153126;color:#a9f2d0}
-#app{height:100vh;min-height:540px;display:grid;grid-template-columns:245px minmax(0,1fr);overflow:hidden}
-.sidebar{background:#121119;border-right:1px solid var(--line);display:flex;flex-direction:column;padding:22px 14px 14px;min-width:0}
-.sidebar .brand{padding:0 10px 28px}.nav-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#777286;padding:0 12px 8px}
-.nav{display:grid;gap:5px}.nav button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:transparent;color:#aaa6b8;text-align:left;padding:11px 12px;border-radius:10px}.nav button:hover{background:#201e2b;color:white}.nav button.active{background:#2a2340;color:#d9ceff}.nav-icon{width:20px;text-align:center;font-size:17px}.nav-count{margin-left:auto;font-size:11px;background:var(--accent);color:#160e2b;padding:2px 7px;border-radius:20px;font-weight:800}
-.sidebar-bottom{margin-top:auto}.profile-mini{display:flex;align-items:center;gap:10px;padding:12px 9px;border-top:1px solid var(--line);margin-top:16px}.avatar{width:36px;height:36px;border-radius:50%;background:#342a4f;color:#dcd1ff;display:grid;place-items:center;font-weight:800;flex:none}.profile-mini .name{font-weight:700;font-size:13px}.profile-mini .handle{font-size:11px;color:var(--muted)}
-.main{min-width:0;display:flex;flex-direction:column;background:var(--bg)}.topbar{height:68px;flex:none;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px}.topbar h2{font-size:17px;margin:0}.topbar-right{display:flex;align-items:center;gap:12px}.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px}
-.content{padding:26px;overflow:auto;flex:1;min-height:0}.welcome{height:100%;min-height:300px;display:grid;place-items:center;text-align:center}.welcome-inner{max-width:390px}.welcome-mark{margin:0 auto 18px;width:64px;height:64px;border-radius:21px;background:#28213b;color:#b8a5ff;display:grid;place-items:center;font-size:28px}.welcome h1{font-size:25px;margin:0 0 8px;letter-spacing:-.8px}.welcome p{color:var(--muted);margin:0 0 20px}
-.section-head{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:20px}.section-head h2{font-size:21px;margin:0}.section-head p{margin:4px 0 0;color:var(--muted);font-size:13px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:18px;margin-bottom:16px}.card h3{font-size:14px;margin:0 0 14px}.row{display:flex;align-items:center;gap:10px}.row-between{display:flex;align-items:center;justify-content:space-between;gap:12px}.person{display:flex;align-items:center;gap:11px;min-width:0}.person .person-name{font-weight:700;font-size:14px}.person .person-sub{font-size:12px;color:var(--muted)}.person .avatar{width:39px;height:39px}
-.person-list{display:grid;gap:2px}.person-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 5px;border-bottom:1px solid #282632}.person-item:last-child{border-bottom:0}
-.search-row{display:flex;gap:9px}.search-row .search-input{flex:1;min-width:0}
-.chat-layout{height:100%;min-height:360px;display:grid;grid-template-columns:290px minmax(0,1fr);border:1px solid var(--line);border-radius:15px;overflow:hidden;background:var(--panel)}
-.chat-list{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}.chat-list-head{padding:18px;border-bottom:1px solid var(--line)}.chat-list-head h3{margin:0 0 12px}.chat-list-items{overflow:auto;padding:8px}
-.chat-entry{display:flex;gap:11px;align-items:center;padding:11px;border-radius:11px;cursor:pointer}.chat-entry:hover{background:#211f2b}.chat-entry.active{background:#2a2340}.chat-entry .entry-copy{min-width:0;flex:1}.chat-entry .entry-title{font-size:13px;font-weight:700}.chat-entry .entry-preview{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chat-window{display:flex;flex-direction:column;min-width:0;min-height:0}.chat-head{height:65px;flex:none;border-bottom:1px solid var(--line);padding:0 18px;display:flex;align-items:center;justify-content:space-between}.chat-messages{flex:1;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:10px}.message{max-width:min(72%,520px);padding:10px 13px;border-radius:14px;background:#24222e;align-self:flex-start;overflow-wrap:anywhere}.message.mine{background:#493777;align-self:flex-end}.message-meta{font-size:10px;color:#b5afc5;margin-top:5px}.message-form{display:flex;gap:9px;padding:14px;border-top:1px solid var(--line)}.message-input{resize:none;min-height:44px;max-height:120px}.send-btn{width:46px;flex:none}
-.empty-small{padding:22px;text-align:center;color:var(--muted);font-size:13px}
-.settings-grid{max-width:620px}.settings-grid .field{max-width:430px}
-.mobile-brand{display:none}
-@media(max-width:760px){#app{grid-template-columns:66px minmax(0,1fr)}.sidebar{padding:16px 8px}.sidebar .brand{padding:0 8px 24px}.brand-word,.nav-label,.nav-text,.profile-mini .profile-copy,.nav-count{display:none}.nav button{justify-content:center;padding:12px 4px}.nav-icon{font-size:19px}.profile-mini{justify-content:center;padding:12px 0}.profile-mini .avatar{width:34px;height:34px}.topbar{padding:0 16px}.content{padding:14px}.chat-layout{grid-template-columns:105px minmax(0,1fr)}.chat-list-head{padding:10px}.chat-list-head h3{font-size:12px}.chat-entry{padding:9px 5px;justify-content:center}.chat-entry .avatar{width:34px;height:34px}.chat-entry .entry-copy,.chat-entry .entry-time{display:none}.chat-messages{padding:14px}.message{max-width:90%}.chat-head{padding:0 12px}.message-form{padding:10px}.topbar-right .status-label{display:none}}
-@media(max-width:430px){.chat-layout{grid-template-columns:72px minmax(0,1fr)}.chat-list-head .search-input{padding:8px 4px;font-size:11px}.chat-list-head h3{display:none}.chat-entry .avatar{width:30px;height:30px}.section-head{align-items:flex-start;flex-direction:column}}
+:root{color-scheme:dark;--bg:#0e0d13;--panel:#15141d;--panel2:#1b1a25;--line:#292735;--text:#f4f1fb;--muted:#9692a5;--accent:#9b7bff;--green:#4bd49a;--red:#ff727e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}.hidden{display:none!important}.muted{color:var(--muted)}.small{font-size:12px}.accent{color:var(--accent)}
+#auth-screen{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,#30224f 0,transparent 48%),var(--bg)}.auth-card{width:min(420px,100%);background:#17151f;border:1px solid var(--line);border-radius:22px;padding:32px;box-shadow:0 25px 90px #0007}.brand{display:flex;align-items:center;gap:10px;font-size:23px;font-weight:800;letter-spacing:-1px}.brand-mark{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#b29bff,#7650ed);display:grid;place-items:center;color:#fff;font-weight:900}.auth-card h1{font-size:25px;margin:30px 0 6px}.auth-card p{margin:0 0 24px;color:var(--muted)}.field{display:grid;gap:7px;margin:14px 0}.field label{font-size:13px;color:#c9c5d4}.field input,.message-input{width:100%;border:1px solid var(--line);background:#100f16;color:var(--text);border-radius:10px;padding:12px 13px;outline:none}.field input:focus,.message-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #9b7bff20}.primary,.secondary{border:0;border-radius:10px;padding:11px 15px;font-weight:700}.primary{background:var(--accent);color:#130d22}.primary:hover{background:#b29cff}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.wide{width:100%;margin-top:12px}.notice{padding:10px 12px;border-radius:10px;background:#242033;color:#d9d0ff;font-size:13px;margin:12px 0}.error{background:#351d26;color:#ffb7c0}.success{background:#153126;color:#a9f2d0}
+#app{height:100vh;min-height:540px;display:grid;grid-template-columns:245px minmax(0,1fr) 220px;overflow:hidden}.sidebar{background:#121119;border-right:1px solid var(--line);display:flex;flex-direction:column;padding:22px 14px 14px;min-width:0}.sidebar .brand{padding:0 10px 25px}.server-label,.nav-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#777286;padding:0 12px 8px}.server-label{display:flex;align-items:center;justify-content:space-between}.channel-list{display:grid;gap:3px;margin-bottom:20px}.channel-btn{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:#aaa6b8;text-align:left;padding:9px 11px;border-radius:9px}.channel-btn:hover{background:#201e2b;color:white}.channel-btn.active{background:#2a2340;color:#e1d8ff}.channel-symbol{width:18px;text-align:center;color:#8f899f;font-size:16px}.channel-count{margin-left:auto;color:var(--muted);font-size:11px}.sidebar-bottom{margin-top:auto}.profile-mini{display:flex;align-items:center;gap:10px;padding:12px 9px;border-top:1px solid var(--line);margin-top:12px}.avatar{width:36px;height:36px;border-radius:50%;background:#342a4f;color:#dcd1ff;display:grid;place-items:center;font-weight:800;flex:none}.profile-mini .name{font-weight:700;font-size:13px}.profile-mini .sub{font-size:11px;color:var(--muted)}.settings-btn{margin-left:auto;background:transparent;border:0;color:var(--muted);font-size:18px;padding:6px}
+.main{min-width:0;display:flex;flex-direction:column;background:var(--bg)}.topbar{height:68px;flex:none;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px}.topbar h2{font-size:17px;margin:0}.topbar-right{display:flex;align-items:center;gap:14px}.online-count{font-size:12px;color:var(--muted)}.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px}.content{padding:22px;overflow:auto;flex:1;min-height:0}.chat-messages{display:flex;flex-direction:column;gap:14px;max-width:900px;margin:0 auto;padding-bottom:20px}.message-row{display:flex;gap:11px;align-items:flex-start}.message-row .avatar{width:35px;height:35px;font-size:12px}.message-copy{min-width:0;flex:1}.message-author{font-size:13px;font-weight:750;margin-bottom:3px}.message-time{font-size:10px;color:var(--muted);font-weight:400;margin-left:7px}.message-body{white-space:pre-wrap;overflow-wrap:anywhere;color:#e4e0ec}.composer-wrap{padding:14px 22px 20px;border-top:1px solid var(--line)}.message-form{display:flex;gap:9px;max-width:900px;margin:0 auto}.message-input{resize:none;min-height:46px;max-height:130px}.send-btn{width:48px;flex:none}.empty-state{height:100%;min-height:260px;display:grid;place-items:center;text-align:center;color:var(--muted)}.empty-state strong{display:block;color:var(--text);font-size:19px;margin-bottom:7px}.members{background:#121119;border-left:1px solid var(--line);padding:20px 13px;overflow:auto}.members h3{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#898497;margin:2px 8px 14px}.member{display:flex;align-items:center;gap:9px;padding:8px;border-radius:9px}.member:hover{background:#1e1c27}.member .avatar{width:30px;height:30px;font-size:11px}.member-name{font-size:12px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.member-status{font-size:10px;color:var(--green)}.member-empty{font-size:12px;color:var(--muted);padding:8px}
+.voice-page,.settings-page{max-width:760px;margin:0 auto}.voice-card,.settings-card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:22px;margin-bottom:16px}.voice-card h2,.settings-card h2{margin:0 0 5px;font-size:21px}.voice-card p,.settings-card p{color:var(--muted);font-size:13px}.voice-people{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.voice-person{background:#211f2b;border:1px solid var(--line);border-radius:12px;padding:13px;min-width:110px;text-align:center}.voice-person .avatar{margin:0 auto 7px;width:42px;height:42px}.voice-controls{display:flex;gap:9px;flex-wrap:wrap}.settings-card .field{max-width:420px}.voice-error{margin-top:14px}
+@media(max-width:900px){#app{grid-template-columns:205px minmax(0,1fr)}.members{display:none}.sidebar{padding:16px 10px}.topbar{padding:0 16px}.content{padding:15px}.composer-wrap{padding:10px 14px 14px}}
+@media(max-width:520px){#app{grid-template-columns:58px minmax(0,1fr)}.sidebar{padding:13px 6px}.sidebar .brand{padding:0 6px 22px}.brand-word,.server-label,.nav-label,.channel-name,.channel-count,.profile-copy,.settings-btn{display:none}.channel-btn{justify-content:center;padding:12px 3px}.channel-symbol{font-size:18px}.profile-mini{justify-content:center;padding:12px 0}.profile-mini .avatar{width:33px;height:33px}.topbar{height:58px}.topbar h2{font-size:15px}.content{padding:12px}.message-row{gap:8px}.message-row .avatar{width:30px;height:30px}.message-time{display:block;margin-left:0}.composer-wrap{padding:8px}.message-input{padding:10px}.voice-card,.settings-card{padding:16px}}
 </style>
 </head>
 <body>
-<section id="auth-screen"><div class="auth-card"><div class="brand"><span class="brand-mark">o</span><span>opix</span></div><h1>What's your name?</h1><p>Pick a display name and jump straight into the chat.</p><form id="guest-form"><div class="field"><label for="guest-name">Display name</label><input id="guest-name" maxlength="32" minlength="1" autocomplete="nickname" placeholder="e.g. Cosmyx" required autofocus></div><button class="primary wide" id="guest-submit" type="submit">Enter opix →</button></form><div id="auth-notice" class="notice hidden" role="status"></div></div></section>
-
+<section id="auth-screen"><div class="auth-card"><div class="brand"><span class="brand-mark">o</span><span>opix</span></div><h1>What's your display name?</h1><p>One community. Channels for everything. Jump straight in.</p><form id="guest-form"><div class="field"><label for="guest-name">Display name</label><input id="guest-name" maxlength="32" minlength="1" autocomplete="nickname" placeholder="e.g. Cosmyx" required autofocus></div><button class="primary wide" id="guest-submit" type="submit">Enter opix →</button></form><div id="auth-notice" class="notice hidden" role="status"></div></div></section>
 <section id="app" class="hidden">
-  <aside class="sidebar">
-    <div class="brand"><span class="brand-mark">o</span><span class="brand-word">opix</span></div>
-    <div class="nav-label">Workspace</div>
-    <nav class="nav">
-      <button data-page="messages" class="active"><span class="nav-icon">▤</span><span class="nav-text">Messages</span></button>
-      <button data-page="friends"><span class="nav-icon">♧</span><span class="nav-text">Friends</span><span id="friend-count" class="nav-count hidden">0</span></button>
-      <button data-page="settings"><span class="nav-icon">⚙</span><span class="nav-text">Settings</span></button>
-    </nav>
-    <div class="sidebar-bottom">
-      <div class="profile-mini"><div class="avatar" id="side-avatar">?</div><div class="profile-copy"><div class="name" id="side-name">you</div><div class="handle" id="side-handle"></div></div></div>
-    </div>
-  </aside>
-  <main class="main">
-    <header class="topbar"><h2 id="page-title">Messages</h2><div class="topbar-right"><span class="small muted status-label"><span class="status-dot"></span>Connected</span></div></header>
-    <div class="content" id="page-content"></div>
-  </main>
+<aside class="sidebar">
+  <div class="brand"><span class="brand-mark">o</span><span class="brand-word">opix</span></div>
+  <div class="server-label">THE COMMUNITY <span>●</span></div>
+  <div class="nav-label">TEXT CHANNELS</div><nav class="channel-list" id="text-channels"></nav>
+  <div class="nav-label">VOICE CHANNELS</div><nav class="channel-list" id="voice-channels"></nav>
+  <div class="sidebar-bottom"><div class="profile-mini"><div class="avatar" id="side-avatar">?</div><div class="profile-copy"><div class="name" id="side-name">you</div><div class="sub">online now</div></div><button class="settings-btn" id="settings-open" title="Settings" aria-label="Settings">⚙</button></div></div>
+</aside>
+<main class="main">
+  <header class="topbar"><h2 id="page-title"># general</h2><div class="topbar-right"><span class="online-count"><span class="status-dot"></span><span id="online-count">0</span> online</span></div></header>
+  <div class="content" id="page-content"></div>
+</main>
+<aside class="members"><h3>Online — <span id="member-count">0</span></h3><div id="member-list"><div class="member-empty">Connecting…</div></div></aside>
 </section>
-
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
-
-const SUPABASE_URL = 'https://mhivvklggtvusjnidovi.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_vC8OUvge-MCOTWP0tgqBzA_FWQ0vdvh';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const $ = (s) => document.querySelector(s);
-const state = { user:null, profile:null, page:'messages', conversations:[], friends:[], incoming:[], sent:[], selected:null, messages:[], profiles:[], channel:null, booting:false };
-const escapeHTML = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const initials = (name='?') => (name.trim().slice(0,2) || '?').toUpperCase();
-const timeShort = (value) => { if(!value) return ''; const d=new Date(value); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); };
-const online = (lastSeen) => lastSeen && (Date.now()-new Date(lastSeen).getTime()) < 120000;
-function notice(message, kind='') { const el=$('#auth-notice'); el.textContent=message; el.className='notice '+kind; el.classList.remove('hidden'); }
+const SUPABASE_URL='https://mhivvklggtvusjnidovi.supabase.co';
+const SUPABASE_KEY='sb_publishable_vC8OUvge-MCOTWP0tgqBzA_FWQ0vdvh';
+const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=s=>document.querySelector(s);
+const state={user:null,profile:null,channels:[],active:null,messages:[],online:[],lobby:null,chatRealtime:null,clientKey:null,page:'text',voiceChannel:null,voiceChannelId:null,localStream:null,peers:new Map(),pendingIce:new Map(),voiceMembers:[],muted:false};
+const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initials=(v='?')=>(String(v).trim().slice(0,2)||'?').toUpperCase();
+const timeShort=v=>v?new Date(v).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+function authNotice(msg,kind){const el=$('#auth-notice');el.textContent=msg;el.className='notice '+(kind||'');}
+async function boot(){
+  try{
+    const {data:{session},error}=await supabase.auth.getSession();if(error)throw error;
+    if(session?.user){
+      state.user=session.user;
+      await loadProfile();
+      if(state.profile){await startApp();return;}
+    }
+  }catch(e){console.warn('Session restore:',e.message);}
+  $('#auth-screen').classList.remove('hidden');
+}
 $('#guest-form').addEventListener('submit',async e=>{
   e.preventDefault();
-  const displayName=$('#guest-name').value.trim();
-  if(!displayName || displayName.length>32){ notice('Choose a name between 1 and 32 characters.','error'); return; }
-  const button=$('#guest-submit'); button.disabled=true; button.textContent='Joining…';
-  try {
-    const {data:{session},error:sessionError}=await supabase.auth.getSession();
-    if(sessionError) throw sessionError;
+  const name=$('#guest-name').value.trim();
+  if(!name||name.length>32){authNotice('Choose a display name between 1 and 32 characters.','error');return;}
+  const button=$('#guest-submit');button.disabled=true;button.textContent='Joining…';
+  try{
+    const {data:{session},error:sessionError}=await supabase.auth.getSession();if(sessionError)throw sessionError;
     let user=session?.user;
-    if(!user){
-      const {data,error}=await supabase.auth.signInAnonymously({options:{data:{display_name:displayName}}});
-      if(error) throw error;
-      user=data.user;
-    }
+    if(!user){const {data,error}=await supabase.auth.signInAnonymously({options:{data:{display_name:name}}});if(error)throw error;user=data.user;}
     state.user=user;
     let profile=null;
-    for(let i=0;i<8&&!profile;i++){
-      const {data,error}=await supabase.from('profiles').select('id,display_name,last_seen').eq('id',user.id).maybeSingle();
-      if(error) throw error;
-      profile=data;
-      if(!profile) await new Promise(resolve=>setTimeout(resolve,250));
+    for(let i=0;i<12&&!profile;i++){
+      const {data,error}=await supabase.from('profiles').select('id,display_name').eq('id',user.id).maybeSingle();if(error)throw error;
+      profile=data;if(!profile)await new Promise(r=>setTimeout(r,250));
     }
-    if(!profile) throw new Error('Could not create your guest profile. Try again.');
-    const {data:updated,error:updateError}=await supabase.from('profiles').update({display_name:displayName}).eq('id',user.id).select('id,display_name,last_seen').single();
-    if(updateError) throw updateError;
-    state.profile=updated;
-    await startApp(user);
-  } catch(err) {
-    console.error(err); state.user=null;
-    notice(err.message || 'Could not join opix.','error');
-    button.disabled=false; button.textContent='Enter opix →';
-  }
+    if(!profile)throw new Error('Could not create your guest profile. Try again.');
+    const {data,error}=await supabase.from('profiles').update({display_name:name}).eq('id',user.id).select('id,display_name').single();if(error)throw error;
+    state.profile=data;await startApp();
+  }catch(err){console.error(err);authNotice(err.message||'Could not join opix.','error');button.disabled=false;button.textContent='Enter opix →';}
 });
-
-async function startApp(user){
-  state.user=user;
-  $('#auth-screen').classList.add('hidden'); $('#app').classList.remove('hidden');
-  await loadProfile();
-  if(!state.profile) throw new Error('Your guest profile is still being created. Please try again.');
-  $('#side-name').textContent=state.profile.display_name; $('#side-handle').textContent=''; $('#side-avatar').textContent=initials(state.profile.display_name);
-  await refreshData();
-  subscribeRealtime();
-  state.page='messages'; render();
-  heartbeat();
-}
 async function loadProfile(){
-  const {data,error}=await supabase.from('profiles').select('id,display_name,last_seen').eq('id',state.user.id).maybeSingle();
-  if(error) throw error; state.profile=data;
+  const {data,error}=await supabase.from('profiles').select('id,display_name').eq('id',state.user.id).maybeSingle();if(error)throw error;state.profile=data;
 }
-async function refreshData(){
-  const [profilesRes,requestsRes,convosRes]=await Promise.all([
-    supabase.from('profiles').select('id,display_name,last_seen'),
-    supabase.from('friend_requests').select('*').or('sender_id.eq.'+state.user.id+',receiver_id.eq.'+state.user.id),
-    supabase.from('conversations').select('*').or('participant_1.eq.'+state.user.id+',participant_2.eq.'+state.user.id).order('created_at',{ascending:false})
-  ]);
-  if(profilesRes.error) throw profilesRes.error; if(requestsRes.error) throw requestsRes.error; if(convosRes.error) throw convosRes.error;
-  state.profiles=profilesRes.data||[];
-  const pmap=new Map(state.profiles.map(p=>[p.id,p]));
-  state.friends=(requestsRes.data||[]).filter(r=>r.status==='accepted').map(r=>({request:r,person:pmap.get(r.sender_id===state.user.id?r.receiver_id:r.sender_id)})).filter(x=>x.person);
-  state.incoming=(requestsRes.data||[]).filter(r=>r.status==='pending'&&r.receiver_id===state.user.id).map(r=>({...r,person:pmap.get(r.sender_id)}));
-  state.sent=(requestsRes.data||[]).filter(r=>r.status==='pending'&&r.sender_id===state.user.id).map(r=>({...r,person:pmap.get(r.receiver_id)}));
-  const conversations=convosRes.data||[];
-  const ids=conversations.map(c=>c.id);
-  let latest=[];
-  if(ids.length){const {data,error}=await supabase.from('messages').select('conversation_id,body,created_at,sender_id').in('conversation_id',ids).order('created_at',{ascending:false});if(error)throw error;latest=data||[];}
-  const seen=new Set();
-  state.conversations=conversations.map(c=>{const otherId=c.participant_1===state.user.id?c.participant_2:c.participant_1;const person=pmap.get(otherId);if(!person)return null;const last=latest.find(m=>m.conversation_id===c.id&&!seen.has(c.id));if(last)seen.add(c.id);return {...c,person,last};}).filter(Boolean);
-  $('#friend-count').textContent=state.incoming.length; $('#friend-count').classList.toggle('hidden',!state.incoming.length);
+async function startApp(){
+  $('#auth-screen').classList.add('hidden');$('#app').classList.remove('hidden');
+  $('#side-name').textContent=state.profile.display_name;$('#side-avatar').textContent=initials(state.profile.display_name);
+  state.clientKey=state.user.id+'-'+Math.random().toString(36).slice(2,10);
+  const {data,error}=await supabase.from('chat_channels').select('*').order('position');if(error)throw error;state.channels=data||[];
+  const first=state.channels.find(c=>c.kind==='text');if(!first)throw new Error('No chat channels are set up yet.');
+  state.active=first;await loadMessages();render();
+  connectLobby();subscribeToMessages();
+}
+function connectLobby(){
+  state.lobby=supabase.channel('opix-community',{config:{presence:{key:state.clientKey}}})
+    .on('presence',{event:'sync'},syncOnline)
+    .on('presence',{event:'join'},syncOnline)
+    .on('presence',{event:'leave'},syncOnline)
+    .subscribe(async status=>{
+      if(status==='SUBSCRIBED'){await trackLobby();syncOnline();}
+      else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')console.warn('Community connection:',status);
+    });
+}
+async function trackLobby(){
+  if(!state.lobby)return;
+  await state.lobby.track({client_id:state.clientKey,user_id:state.user.id,display_name:state.profile.display_name,active_channel:state.active?.name||null,voice_channel:state.voiceChannelId});
+}
+function syncOnline(){
+  if(!state.lobby)return;
+  const all=state.lobby.presenceState();const byUser=new Map();
+  Object.values(all).flat().forEach(p=>{if(p.user_id)byUser.set(p.user_id,p);});
+  state.online=Array.from(byUser.values()).sort((a,b)=>a.display_name.localeCompare(b.display_name));
+  $('#online-count').textContent=state.online.length;$('#member-count').textContent=state.online.length;
+  $('#member-list').innerHTML=state.online.map(p=>'<div class="member"><div class="avatar">'+esc(initials(p.display_name))+'</div><div><div class="member-name">'+esc(p.display_name)+'</div><div class="member-status">● online</div></div></div>').join('')||'<div class="member-empty">Nobody else is online yet.</div>';
+  if(state.page==='voice')renderVoicePeopleOnly();
+}
+async function subscribeToMessages(){
+  state.chatRealtime=supabase.channel('opix-channel-messages')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'channel_messages'},async payload=>{
+      if(state.active&&payload.new.channel_id===state.active.id){await loadMessages();if(state.page==='text')renderText();}
+    }).subscribe();
 }
 async function loadMessages(){
-  if(!state.selected){state.messages=[];return;}
-  const {data,error}=await supabase.from('messages').select('*').eq('conversation_id',state.selected.id).order('created_at',{ascending:true}).limit(300);
-  if(error) throw error; state.messages=data||[];
-}
-function subscribeRealtime(){
-  if(state.channel) supabase.removeChannel(state.channel);
-  state.channel=supabase.channel('opix-live-'+state.user.id)
-    .on('postgres_changes',{event:'*',schema:'public',table:'messages'},async payload=>{
-      if(state.selected && (payload.new?.conversation_id===state.selected.id || payload.old?.conversation_id===state.selected.id)){await loadMessages();render();}
-      await refreshData(); if(state.page==='messages') render();
-    })
-    .on('postgres_changes',{event:'*',schema:'public',table:'friend_requests'},async()=>{await refreshData();render();})
-    .on('postgres_changes',{event:'*',schema:'public',table:'conversations'},async()=>{await refreshData();render();})
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},async()=>{await refreshData();render();})
-    .subscribe();
-}
-async function heartbeat(){
-  if(!state.user)return;
-  await supabase.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',state.user.id);
-  setTimeout(heartbeat,60000);
-}
-async function ensureConversation(otherId){
-  const a=[state.user.id,otherId].sort();
-  let {data,error}=await supabase.from('conversations').select('*').eq('participant_1',a[0]).eq('participant_2',a[1]).maybeSingle();
+  if(!state.active)return;
+  const {data,error}=await supabase.from('channel_messages').select('id,channel_id,sender_id,body,created_at').eq('channel_id',state.active.id).order('created_at',{ascending:true}).limit(250);
   if(error)throw error;
-  if(!data){const result=await supabase.from('conversations').insert({participant_1:a[0],participant_2:a[1]}).select().single();if(result.error)throw result.error;data=result.data;}
-  await refreshData(); return data;
-}
-async function openConversation(conversation){
-  state.selected=conversation; await loadMessages(); state.page='messages'; render();
+  const rows=data||[];const ids=[...new Set(rows.map(m=>m.sender_id))];
+  let people=[];
+  if(ids.length){const result=await supabase.from('profiles').select('id,display_name').in('id',ids);if(result.error)throw result.error;people=result.data||[];}
+  const names=new Map(people.map(p=>[p.id,p.display_name]));names.set(state.user.id,state.profile.display_name);
+  state.messages=rows.map(m=>({...m,display_name:names.get(m.sender_id)||'Unknown'}));
 }
 function render(){
-  $('#page-title').textContent=state.page==='messages'?'Messages':state.page==='friends'?'Friends':'Settings';
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===state.page));
-  if(state.page==='messages') renderMessagesPage(); else if(state.page==='friends') renderFriendsPage(); else renderSettingsPage();
+  $('#text-channels').innerHTML=state.channels.filter(c=>c.kind==='text').map(c=>'<button class="channel-btn '+(state.page==='text'&&state.active?.id===c.id?'active':'')+'" data-text="'+c.id+'"><span class="channel-symbol">#</span><span class="channel-name">'+esc(c.name)+'</span></button>').join('');
+  $('#voice-channels').innerHTML=state.channels.filter(c=>c.kind==='voice').map(c=>'<button class="channel-btn '+(state.page==='voice'&&state.voiceChannelId===c.id?'active':'')+'" data-voice="'+c.id+'"><span class="channel-symbol">◖))</span><span class="channel-name">'+esc(c.name)+'</span></button>').join('');
+  document.querySelectorAll('[data-text]').forEach(b=>b.onclick=()=>selectText(b.dataset.text));
+  document.querySelectorAll('[data-voice]').forEach(b=>b.onclick=()=>openVoice(b.dataset.voice));
+  $('#settings-open').onclick=()=>{state.page='settings';render();};
+  if(state.page==='text')renderText();
+  else if(state.page==='voice')renderVoice();
+  else renderSettings();
 }
-function renderMessagesPage(){
-  const content=$('#page-content');
-  if(!state.conversations.length){
-    content.innerHTML='<div class="welcome"><div class="welcome-inner"><div class="welcome-mark">✉</div><h1>Your chats start here.</h1><p>Add a friend and send your first message. No clutter, just conversations.</p><button class="primary" id="go-friends">Find friends</button></div></div>';
-    $('#go-friends').onclick=()=>{state.page='friends';render();}; return;
-  }
-  const list=state.conversations.map(c=>`<div class="chat-entry ${state.selected?.id===c.id?'active':''}" data-chat="${c.id}"><div class="avatar">${initials(c.person.display_name)}</div><div class="entry-copy"><div class="entry-title">${escapeHTML(c.person.display_name)}</div><div class="entry-preview">${escapeHTML(c.last?.body||'Start a conversation')}</div></div><span class="entry-time small muted">${timeShort(c.last?.created_at)}</span></div>`).join('');
-  let thread='';
-  if(state.selected){
-    const person=state.selected.person;
-    const msgs=state.messages.map(m=>`<div class="message ${m.sender_id===state.user.id?'mine':''}">${escapeHTML(m.body)}<div class="message-meta">${timeShort(m.created_at)}</div></div>`).join('');
-    thread=`<div class="chat-head"><div class="person"><div class="avatar">${initials(person.display_name)}</div><div><div class="person-name">${escapeHTML(person.display_name)}</div><div class="person-sub">${online(person.last_seen)?'<span class="accent">● online</span>':'last seen '+timeShort(person.last_seen)}</div></div></div></div><div class="chat-messages" id="chat-messages">${msgs||'<div class="empty-small">Say hello 👋</div>'}</div><form class="message-form" id="message-form"><textarea class="message-input" id="message-body" rows="1" maxlength="4000" placeholder="Write a message…"></textarea><button class="primary send-btn" type="submit" aria-label="Send message">➤</button></form>`;
-  }else thread='<div class="welcome"><div class="welcome-inner"><div class="welcome-mark">✦</div><h1>Pick a conversation.</h1><p>Your messages will show up here.</p></div></div>';
-  content.innerHTML=`<div class="chat-layout"><aside class="chat-list"><div class="chat-list-head"><h3>Chats</h3><input class="search-input" id="chat-filter" placeholder="Search chats…"></div><div class="chat-list-items" id="chat-list-items">${list}</div></aside><section class="chat-window">${thread}</section></div>`;
-  document.querySelectorAll('[data-chat]').forEach(el=>el.addEventListener('click',()=>{const c=state.conversations.find(x=>x.id===el.dataset.chat);if(c)openConversation(c);}));
-  $('#chat-filter').addEventListener('input',e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('[data-chat]').forEach(el=>el.classList.toggle('hidden',!el.textContent.toLowerCase().includes(q)));});
-  if(state.selected){const box=$('#chat-messages');box.scrollTop=box.scrollHeight;$('#message-form').addEventListener('submit',sendMessage);$('#message-body').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#message-form').requestSubmit();}});}
+async function selectText(id){
+  if(state.voiceChannelId)await leaveVoice();
+  state.active=state.channels.find(c=>c.id===id);state.page='text';
+  try{await loadMessages();await trackLobby();render();}catch(e){alert(e.message);}
+}
+function renderText(){
+  const c=state.active;if(!c)return;
+  $('#page-title').textContent='# '+c.name;
+  const messages=state.messages.map(m=>'<div class="message-row"><div class="avatar">'+esc(initials(m.display_name))+'</div><div class="message-copy"><div class="message-author">'+esc(m.display_name)+'<span class="message-time">'+timeShort(m.created_at)+'</span></div><div class="message-body">'+esc(m.body)+'</div></div></div>').join('');
+  $('#page-content').innerHTML='<div class="chat-messages" id="chat-messages">'+(messages||'<div class="empty-state"><div><strong>Welcome to #'+esc(c.name)+'</strong>This is the start of this channel. Say something!</div></div>')+'</div>';
+  $('#page-content').scrollTop=$('#page-content').scrollHeight;
+  const form=document.createElement('div');form.className='composer-wrap';form.innerHTML='<form class="message-form" id="message-form"><textarea class="message-input" id="message-body" rows="1" maxlength="4000" placeholder="Message #'+esc(c.name)+'"></textarea><button class="primary send-btn" type="submit">➤</button></form>';
+  $('#page-content').appendChild(form);
+  $('#message-form').addEventListener('submit',sendMessage);
+  $('#message-body').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#message-form').requestSubmit();}});
 }
 async function sendMessage(e){
-  e.preventDefault();const input=$('#message-body');const body=input.value.trim();if(!body||!state.selected)return;
+  e.preventDefault();const input=$('#message-body');const body=input.value.trim();if(!body||!state.active)return;
   const button=$('#message-form button');button.disabled=true;
-  const {error}=await supabase.from('messages').insert({conversation_id:state.selected.id,sender_id:state.user.id,body});
-  button.disabled=false;if(error){alert(error.message);return;}input.value='';await loadMessages();await refreshData();render();
+  const {error}=await supabase.from('channel_messages').insert({channel_id:state.active.id,sender_id:state.user.id,body});
+  button.disabled=false;if(error){alert(error.message);return;}input.value='';
+  await loadMessages();renderText();$('#message-body').focus();
 }
-function renderFriendsPage(){
-  const incoming=state.incoming.map(r=>`<div class="person-item"><div class="person"><div class="avatar">${initials(r.person?.display_name)}</div><div><div class="person-name">${escapeHTML(r.person?.display_name||'Unknown')}</div><div class="person-sub">Wants to connect</div></div></div><div class="row"><button class="primary" data-accept="${r.id}">Accept</button><button class="secondary" data-decline="${r.id}">×</button></div></div>`).join('')||'<div class="empty-small">No new requests.</div>';
-  const friends=state.friends.map(f=>`<div class="person-item"><div class="person"><div class="avatar">${initials(f.person.display_name)}</div><div><div class="person-name">${escapeHTML(f.person.display_name)}</div><div class="person-sub">${online(f.person.last_seen)?'<span class="accent">● online</span>':'offline'}</div></div></div><button class="secondary" data-message="${f.person.id}">Message</button></div>`).join('')||'<div class="empty-small">No friends yet. Search for someone above.</div>';
-  const sent=state.sent.map(r=>`<div class="person-item"><div class="person"><div class="avatar">${initials(r.person?.display_name)}</div><div><div class="person-name">${escapeHTML(r.person?.display_name||'Unknown')}</div><div class="person-sub">Request sent</div></div></div><span class="small muted">Pending</span></div>`).join('');
-  $('#page-content').innerHTML=`<div class="section-head"><div><h2>Friends</h2><p>Find people and manage your connections.</p></div></div><div class="card"><h3>Add a friend</h3><form class="search-row" id="friend-search"><input class="search-input" id="friend-display-name" placeholder="Search by display name" autocomplete="off"><button class="primary" type="submit">Search</button></form><div id="friend-search-result"></div></div><div class="card"><div class="row-between"><h3>Friend requests</h3><span class="small muted">${state.incoming.length}</span></div><div class="person-list">${incoming}</div></div><div class="card"><div class="row-between"><h3>Your friends</h3><span class="small muted">${state.friends.length}</span></div><div class="person-list">${friends}</div></div>${sent?'<div class="card"><h3>Sent requests</h3><div class="person-list">'+sent+'</div></div>':''}`;
-  $('#friend-search').addEventListener('submit',searchFriend);
-  document.querySelectorAll('[data-accept]').forEach(b=>b.onclick=()=>respondRequest(b.dataset.accept,'accepted'));
-  document.querySelectorAll('[data-decline]').forEach(b=>b.onclick=()=>respondRequest(b.dataset.decline,'declined'));
-  document.querySelectorAll('[data-message]').forEach(b=>b.onclick=async()=>{try{const c=await ensureConversation(b.dataset.message);const p=state.profiles.find(x=>x.id===b.dataset.message);await openConversation({...c,person:p});}catch(e){alert(e.message);}});
+function openVoice(id){
+  state.page='voice';state.voiceChannelId=id;render();trackLobby();
 }
-async function searchFriend(e){
-  e.preventDefault();
-  const term=$('#friend-display-name').value.trim();
-  const result=$('#friend-search-result');
-  result.innerHTML='';
-  if(term.length<2){result.innerHTML='<div class="notice">Type at least 2 characters to search.</div>';return;}
-  const {data,error}=await supabase.from('profiles').select('id,display_name,last_seen').ilike('display_name','%'+term+'%').limit(12);
-  if(error){result.innerHTML='<div class="notice error">'+escapeHTML(error.message)+'</div>';return;}
-  const people=(data||[]).filter(p=>p.id!==state.user.id);
-  if(!people.length){result.innerHTML='<div class="empty-small">No matching display names found.</div>';return;}
-  result.innerHTML=people.map(p=>{
-    const isFriend=state.friends.some(f=>f.person.id===p.id);
-    const hasIncoming=state.incoming.some(r=>r.sender_id===p.id);
-    const hasSent=state.sent.some(r=>r.receiver_id===p.id);
-    const label=isFriend?'Friends':hasIncoming?'Request received':hasSent?'Request sent':'Add friend';
-    const disabled=isFriend||hasIncoming||hasSent;
-    return `<div class="person-item"><div class="person"><div class="avatar">${initials(p.display_name)}</div><div><div class="person-name">${escapeHTML(p.display_name)}</div><div class="person-sub">opix user</div></div></div><button class="primary" data-add-friend="${p.id}" ${disabled?'disabled':''}>${label}</button></div>`;
-  }).join('');
-  result.querySelectorAll('[data-add-friend]').forEach(button=>button.onclick=async()=>{
-    button.disabled=true;
-    const {error}=await supabase.from('friend_requests').insert({sender_id:state.user.id,receiver_id:button.dataset.addFriend});
-    if(error){button.disabled=false;button.textContent='Try again';const note=document.createElement('div');note.className='notice error';note.textContent=error.message;result.prepend(note);return;}
-    button.textContent='Request sent';
-    await refreshData();
-  });
-}
-
-async function respondRequest(id,status){
-  const {error}=await supabase.from('friend_requests').update({status,updated_at:new Date().toISOString()}).eq('id',id);
-  if(error){alert(error.message);return;}
-  if(status==='accepted'){
-    const r=state.incoming.find(x=>x.id===id);if(r){try{await ensureConversation(r.sender_id);}catch(e){alert('Friend added, but the chat could not be created: '+e.message);}}
+async function joinVoice(){
+  const room=state.channels.find(c=>c.id===state.voiceChannelId);if(!room)return;
+  const errorBox=$('#voice-error');if(errorBox){errorBox.classList.add('hidden');errorBox.textContent='';}
+  try{
+    if(!navigator.mediaDevices?.getUserMedia)throw new Error('Voice chat needs a secure HTTPS connection and a microphone-enabled browser.');
+    state.localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    const topic='opix-voice-'+room.id;
+    state.voiceChannel=supabase.channel(topic,{config:{presence:{key:state.clientKey}}})
+      .on('presence',{event:'sync'},syncVoiceMembers)
+      .on('presence',{event:'join'},syncVoiceMembers)
+      .on('presence',{event:'leave'},syncVoiceMembers)
+      .on('broadcast',{event:'signal'},handleVoiceSignal)
+      .subscribe(async status=>{
+        if(status==='SUBSCRIBED'){
+          await state.voiceChannel.track({client_id:state.clientKey,user_id:state.user.id,display_name:state.profile.display_name});
+          syncVoiceMembers();
+          await trackLobby();
+        }
+      });
+    state.muted=false;
+    render();
+  }catch(e){
+    if(state.localStream){state.localStream.getTracks().forEach(t=>t.stop());state.localStream=null;}
+    const box=$('#voice-error');if(box){box.textContent=e.message||'Could not join voice.';box.classList.remove('hidden');}
   }
-  await refreshData();render();
 }
-function renderSettingsPage(){
-  $('#page-content').innerHTML=`<div class="section-head"><div><h2>Settings</h2><p>Your display name.</p></div></div><div class="card settings-grid"><h3>Profile</h3><form id="profile-form"><div class="field"><label for="settings-display-name">Display name</label><input id="settings-display-name" value="${escapeHTML(state.profile.display_name)}" minlength="1" maxlength="32" required></div><button class="primary" type="submit">Save changes</button></form><div class="notice hidden" id="settings-notice"></div><p class="muted small">You're using opix as a guest. Your guest identity is saved in this browser. Clearing browser data may make you lose access to this guest account.</p></div>`;
+function syncVoiceMembers(){
+  if(!state.voiceChannel)return;
+  const all=state.voiceChannel.presenceState();
+  const map=new Map();
+  Object.values(all).flat().forEach(p=>{if(p.client_id&&p.client_id!==state.clientKey)map.set(p.client_id,p);});
+  state.voiceMembers=Array.from(map.values());
+  renderVoicePeopleOnly();
+  connectToVoicePeers();
+}
+function renderVoicePeopleOnly(){
+  if(state.page!=='voice'||!$('#voice-people'))return;
+  const list=[];
+  if(state.localStream)list.push({display_name:state.profile.display_name,local:true});
+  state.voiceMembers.forEach(p=>list.push(p));
+  $('#voice-people').innerHTML=list.map(p=>'<div class="voice-person"><div class="avatar">'+esc(initials(p.display_name))+'</div><div class="small">'+esc(p.display_name)+(p.local?' (you)':'')+'</div></div>').join('')||'<div class="empty-state">No one is in this voice channel yet.</div>';
+  const count=$('#voice-count');if(count)count.textContent=list.length;
+}
+function makePeer(remote){
+  let pc=state.peers.get(remote.client_id);if(pc)return pc;
+  pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]});
+  state.peers.set(remote.client_id,pc);
+  state.localStream?.getTracks().forEach(track=>pc.addTrack(track,state.localStream));
+  pc.onicecandidate=e=>{if(e.candidate)sendVoiceSignal(remote.client_id,{candidate:e.candidate.toJSON()});};
+  pc.ontrack=e=>{
+    let audio=document.getElementById('audio-'+remote.client_id);
+    if(!audio){audio=document.createElement('audio');audio.id='audio-'+remote.client_id;audio.autoplay=true;audio.playsInline=true;audio.style.display='none';document.body.appendChild(audio);}
+    audio.srcObject=e.streams[0];audio.play().catch(()=>{});
+  };
+  pc.onconnectionstatechange=()=>{if(pc.connectionState==='failed'||pc.connectionState==='closed'||pc.connectionState==='disconnected'){if(pc.connectionState!=='disconnected')dropPeer(remote.client_id);}};
+  return pc;
+}
+async function connectToVoicePeers(){
+  if(!state.voiceChannel||!state.localStream)return;
+  for(const remote of state.voiceMembers){
+    if(state.clientKey>remote.client_id&&!state.peers.has(remote.client_id)){
+      try{
+        const pc=makePeer(remote);const offer=await pc.createOffer();await pc.setLocalDescription(offer);
+        await sendVoiceSignal(remote.client_id,{description:pc.localDescription});
+      }catch(e){console.warn('Voice offer failed:',e);}
+    }
+  }
+}
+async function sendVoiceSignal(to,signal){
+  if(!state.voiceChannel)return;
+  await state.voiceChannel.send({type:'broadcast',event:'signal',payload:{from:state.clientKey,to:to,signal:signal}});
+}
+async function handleVoiceSignal(event){
+  const p=event.payload||{};if(p.to!==state.clientKey||!p.from||!p.signal)return;
+  const remote=state.voiceMembers.find(x=>x.client_id===p.from)||{client_id:p.from,display_name:'Someone'};
+  try{
+    let pc=state.peers.get(p.from);
+    if(p.signal.description){
+      if(!pc)pc=makePeer(remote);
+      const desc=p.signal.description;
+      await pc.setRemoteDescription(new RTCSessionDescription(desc));
+      const queued=state.pendingIce.get(p.from)||[];for(const candidate of queued)await pc.addIceCandidate(new RTCIceCandidate(candidate));state.pendingIce.delete(p.from);
+      if(desc.type==='offer'){
+        const answer=await pc.createAnswer();await pc.setLocalDescription(answer);
+        await sendVoiceSignal(p.from,{description:pc.localDescription});
+      }
+    }else if(p.signal.candidate){
+      if(pc&&pc.remoteDescription)await pc.addIceCandidate(new RTCIceCandidate(p.signal.candidate));
+      else{const q=state.pendingIce.get(p.from)||[];q.push(p.signal.candidate);state.pendingIce.set(p.from,q);}
+    }
+  }catch(e){console.warn('Voice signal error:',e);}
+}
+function dropPeer(id){
+  const pc=state.peers.get(id);if(pc)pc.close();state.peers.delete(id);state.pendingIce.delete(id);
+  const audio=document.getElementById('audio-'+id);if(audio){audio.srcObject=null;audio.remove();}
+}
+async function leaveVoice(){
+  if(state.voiceChannel){try{await state.voiceChannel.untrack();}catch(e){}await supabase.removeChannel(state.voiceChannel);}
+  state.voiceChannel=null;
+  for(const id of Array.from(state.peers.keys()))dropPeer(id);
+  if(state.localStream){state.localStream.getTracks().forEach(t=>t.stop());state.localStream=null;}
+  state.voiceMembers=[];state.voiceChannelId=null;state.muted=false;
+  await trackLobby();
+}
+function renderVoice(){
+  const room=state.channels.find(c=>c.id===state.voiceChannelId);if(!room)return;
+  $('#page-title').textContent='◖)) '+room.name;
+  $('#page-content').innerHTML='<div class="voice-page"><div class="voice-card"><h2>'+esc(room.name)+'</h2><p>Hang out and talk with everyone in this voice channel.</p><div class="row"><span class="status-dot"></span><span class="small muted"><span id="voice-count">0</span> connected</span></div><div class="voice-people" id="voice-people"></div><div class="voice-controls" id="voice-controls">'+(state.localStream?'<button class="secondary" id="mute-btn">'+(state.muted?'Unmute mic':'Mute mic')+'</button><button class="primary" id="leave-voice">Leave voice</button>':'<button class="primary" id="join-voice">Join voice</button>')+'</div><div class="notice error voice-error hidden" id="voice-error"></div></div></div>';
+  renderVoicePeopleOnly();
+  if($('#join-voice'))$('#join-voice').onclick=joinVoice;
+  if($('#leave-voice'))$('#leave-voice').onclick=async()=>{await leaveVoice();state.page='text';if(!state.active)state.active=state.channels.find(c=>c.kind==='text');render();};
+  if($('#mute-btn'))$('#mute-btn').onclick=()=>{state.muted=!state.muted;state.localStream?.getAudioTracks().forEach(t=>t.enabled=!state.muted);$('#mute-btn').textContent=state.muted?'Unmute mic':'Mute mic';};
+}
+function renderSettings(){
+  $('#page-title').textContent='Settings';
+  $('#page-content').innerHTML='<div class="settings-page"><div class="settings-card"><h2>Your profile</h2><p>Change the display name everyone sees.</p><form id="profile-form"><div class="field"><label for="display-name">Display name</label><input id="display-name" maxlength="32" minlength="1" value="'+esc(state.profile.display_name)+'" required></div><button class="primary" type="submit">Save display name</button></form><div id="settings-notice" class="notice hidden"></div></div><div class="settings-card"><h2>About opix</h2><p>One shared community with live text channels, voice rooms and an online member list.</p></div></div>';
   $('#profile-form').addEventListener('submit',saveProfile);
 }
 async function saveProfile(e){
-  e.preventDefault();const display_name=$('#settings-display-name').value.trim();const note=$('#settings-notice');note.classList.remove('hidden');note.className='notice';
-  if(display_name.length<1 || display_name.length>32){note.textContent='Display name must be between 1 and 32 characters.';return;}
-  const {error}=await supabase.from('profiles').update({display_name}).eq('id',state.user.id);
-  if(error){note.className='notice error';note.textContent=error.message;return;}
-  state.profile.display_name=display_name;$('#side-name').textContent=display_name;$('#side-handle').textContent='Guest';$('#side-avatar').textContent=initials(display_name);note.className='notice success';note.textContent='Saved.';
+  e.preventDefault();const name=$('#display-name').value.trim();const note=$('#settings-notice');
+  if(!name||name.length>32){note.textContent='Display name must be 1–32 characters.';note.className='notice error';return;}
+  const {data,error}=await supabase.from('profiles').update({display_name:name}).eq('id',state.user.id).select('id,display_name').single();
+  if(error){note.textContent=error.message;note.className='notice error';return;}
+  state.profile=data;$('#side-name').textContent=name;$('#side-avatar').textContent=initials(name);await trackLobby();
+  note.textContent='Saved!';note.className='notice success';
 }
-document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{state.page=b.dataset.page;render();}));
+window.addEventListener('beforeunload',()=>{try{state.lobby?.untrack();state.voiceChannel?.untrack();state.localStream?.getTracks().forEach(t=>t.stop());}catch(e){}});
 boot();
 </script>
 </body>
