@@ -1,11 +1,12 @@
 # opix
 
-A simple one-to-one chat app built with plain HTML, CSS and JavaScript, Supabase Auth, Postgres and Realtime.
+A simple one-to-one chat app built with plain HTML, CSS and JavaScript, Supabase anonymous Auth, Postgres and Realtime.
 
 ## Features
 
-- Email/password accounts with username profiles
-- Username search and friend requests
+- Opens straight into chat with no signup or login screen
+- Automatic guest identity with an editable display name
+- Display-name search and friend requests
 - Private one-to-one conversations
 - Persistent messages with live updates
 - Basic online/last-seen status
@@ -22,12 +23,13 @@ A simple one-to-one chat app built with plain HTML, CSS and JavaScript, Supabase
 1. Open the repository's **Settings → Pages**.
 2. Set the source to **Deploy from a branch**, choose `main` and `/ (root)`.
 3. Save and wait for GitHub Pages to publish.
+4. In Supabase, open **Authentication → Providers → Anonymous Sign-Ins** and enable anonymous sign-ins.
 
 The frontend is already configured for the opix Supabase project. Its publishable key is intended for browser use; the database is protected by row-level security. Never add a Supabase secret or service-role key to this repository.
 
-## Accounts
+## Guest identity
 
-Supabase email confirmation is enabled by default on hosted projects. New users may need to confirm their email before signing in.
+Opix creates a guest session automatically and stores it in the browser. There is no email, password, signup, or login flow. A guest account cannot be recovered after clearing browser data or switching devices, so keep the same browser data to retain access to that identity.
 
 ## Security note
 
