@@ -1,24 +1,24 @@
 # opix
 
-A simple one-to-one chat app built with plain HTML, CSS and JavaScript, Supabase anonymous Auth, Postgres and Realtime.
+One shared community chat with separate text channels, voice rooms and a live online member list.
 
 ## Features
 
-- Enter a display name and go straight into chat
-- No signup, email, password, or login screen
-- Guest identity is retained in the same browser
+- Enter a display name and jump straight in
+- No signup, email, password or login screen
+- One shared community for everyone
+- Text channels: #general, #memes, #gaming and #off-topic
+- Voice rooms: Lounge and Gaming
+- Live online member list — people already in opix appear automatically
+- Live channel messages saved in Supabase
 - Change your display name in Settings
-- Display-name search and friend requests
-- Private one-to-one conversations
-- Persistent messages with live updates
-- Basic online/last-seen status
-- Responsive layout for desktop and mobile
+- Responsive desktop and mobile layout
 
 ## Stack
 
 - Static frontend: GitHub Pages
-- Backend: Supabase
-- Client: `@supabase/supabase-js` 2.119.0
+- Backend: Supabase Auth, Postgres and Realtime
+- Voice: browser WebRTC audio
 
 ## Deploy
 
@@ -31,8 +31,8 @@ The frontend is configured for the opix Supabase project. Its publishable key is
 
 ## Guest identity
 
-Visitors simply enter a display name. Opix creates an anonymous guest session behind the scenes; there is no signup or login flow. The guest identity is stored in the browser, so clearing browser data or switching devices can make it inaccessible.
+Visitors enter a display name once. Opix creates an anonymous guest session behind the scenes; there is no signup or login flow. The guest identity is retained in that browser, so clearing browser data or switching devices can make it inaccessible.
 
-## Security note
+## Voice chat note
 
-Messages are private to the two conversation participants through RLS. This app does not provide end-to-end encryption; Supabase stores message contents in the database.
+Voice uses direct browser-to-browser WebRTC connections with public STUN servers. Microphone permission and HTTPS are required. Some networks or routers block direct peer connections; this simple version does not include a paid TURN relay service, so voice may not connect on every network.
