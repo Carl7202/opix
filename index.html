@@ -51,8 +51,15 @@ async function boot(){
       state.user=session.user;
       await loadProfile();
       if(state.profile){await startApp();return;}
+      // This browser may still hold a session from before the user reset.
+      await supabase.auth.signOut();
+      state.user=null;state.profile=null;
     }
-  }catch(e){console.warn('Session restore:',e.message);}
+  }catch(e){
+    console.warn('Session restore:',e.message);
+    await supabase.auth.signOut();
+    state.user=null;state.profile=null;
+  }
   $('#auth-screen').classList.remove('hidden');
 }
 $('#guest-form').addEventListener('submit',async e=>{
@@ -63,6 +70,11 @@ $('#guest-form').addEventListener('submit',async e=>{
   try{
     const {data:{session},error:sessionError}=await supabase.auth.getSession();if(sessionError)throw sessionError;
     let user=session?.user;
+    if(user){
+      const {data:existingProfile,error:profileError}=await supabase.from('profiles').select('id').eq('id',user.id).maybeSingle();
+      if(profileError)throw profileError;
+      if(!existingProfile){await supabase.auth.signOut();user=null;}
+    }
     if(!user){const {data,error}=await supabase.auth.signInAnonymously({options:{data:{display_name:name}}});if(error)throw error;user=data.user;}
     state.user=user;
     let profile=null;
