@@ -4,8 +4,10 @@ A simple one-to-one chat app built with plain HTML, CSS and JavaScript, Supabase
 
 ## Features
 
-- Opens straight into chat with no signup or login screen
-- Automatic guest identity with an editable display name
+- Enter a display name and go straight into chat
+- No signup, email, password, or login screen
+- Guest identity is retained in the same browser
+- Change your display name in Settings
 - Display-name search and friend requests
 - Private one-to-one conversations
 - Persistent messages with live updates
@@ -25,11 +27,11 @@ A simple one-to-one chat app built with plain HTML, CSS and JavaScript, Supabase
 3. Save and wait for GitHub Pages to publish.
 4. In Supabase, open **Authentication → Providers → Anonymous Sign-Ins** and enable anonymous sign-ins.
 
-The frontend is already configured for the opix Supabase project. Its publishable key is intended for browser use; the database is protected by row-level security. Never add a Supabase secret or service-role key to this repository.
+The frontend is configured for the opix Supabase project. Its publishable key is intended for browser use; the database is protected by row-level security. Never add a Supabase secret or service-role key to this repository.
 
 ## Guest identity
 
-Opix creates a guest session automatically and stores it in the browser. There is no email, password, signup, or login flow. A guest account cannot be recovered after clearing browser data or switching devices, so keep the same browser data to retain access to that identity.
+Visitors simply enter a display name. Opix creates an anonymous guest session behind the scenes; there is no signup or login flow. The guest identity is stored in the browser, so clearing browser data or switching devices can make it inaccessible.
 
 ## Security note
 
