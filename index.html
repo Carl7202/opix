@@ -41,21 +41,7 @@
 </style>
 </head>
 <body>
-<section id="auth-screen">
-  <div class="auth-card">
-    <div class="brand"><span class="brand-mark">o</span><span>opix</span></div>
-    <h1 id="auth-title">Welcome back.</h1>
-    <p id="auth-subtitle">A simple place to talk.</p>
-    <div id="auth-notice" class="notice hidden" role="status"></div>
-    <form id="auth-form">
-      <div class="field hidden" id="display-name-field"><label for="auth-display-name">Display name</label><input id="auth-display-name" autocomplete="nickname" minlength="1" maxlength="32" placeholder="Your display name"></div>
-      <div class="field"><label for="auth-email">Email</label><input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com"></div>
-      <div class="field"><label for="auth-password">Password</label><input id="auth-password" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters"></div>
-      <button class="primary wide" id="auth-submit" type="submit">Sign in</button>
-    </form>
-    <div class="auth-switch"><span id="auth-switch-copy">New to opix?</span><button class="link-btn" id="auth-switch" type="button">Create an account</button></div>
-  </div>
-</section>
+<section id="auth-screen"><div class="auth-card"><div class="brand"><span class="brand-mark">o</span><span>opix</span></div><h1 id="auth-title">Connecting to opix…</h1><p id="auth-subtitle">Getting your chat ready. No signup or login needed.</p><div id="auth-notice" class="notice hidden" role="status"></div><button class="primary wide hidden" id="retry-connect" type="button">Try again</button></div></section>
 
 <section id="app" class="hidden">
   <aside class="sidebar">
@@ -84,46 +70,44 @@ const SUPABASE_KEY = 'sb_publishable_vC8OUvge-MCOTWP0tgqBzA_FWQ0vdvh';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const $ = (s) => document.querySelector(s);
-const state = { user:null, profile:null, page:'messages', conversations:[], friends:[], incoming:[], sent:[], selected:null, messages:[], profiles:[], authMode:'signin', channel:null, searchResult:null };
+const state = { user:null, profile:null, page:'messages', conversations:[], friends:[], incoming:[], sent:[], selected:null, messages:[], profiles:[], channel:null, booting:false };
 const escapeHTML = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const initials = (name='?') => (name.trim().replace(/^@/,'').slice(0,2) || '?').toUpperCase();
+const initials = (name='?') => (name.trim().slice(0,2) || '?').toUpperCase();
 const timeShort = (value) => { if(!value) return ''; const d=new Date(value); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); };
 const online = (lastSeen) => lastSeen && (Date.now()-new Date(lastSeen).getTime()) < 120000;
 function notice(message, kind='') { const el=$('#auth-notice'); el.textContent=message; el.className='notice '+kind; el.classList.remove('hidden'); }
-function clearNotice(){ $('#auth-notice').classList.add('hidden'); }
-function showAuth(mode='signin') {
-  state.authMode=mode; $('#auth-screen').classList.remove('hidden'); $('#app').classList.add('hidden'); clearNotice();
-  const signup=mode==='signup'; $('#auth-title').textContent=signup?'Create your account.':'Welcome back.'; $('#auth-subtitle').textContent=signup?'Pick a display_name and get chatting.':'A simple place to talk.';
-  $('#display-name-field').classList.toggle('hidden',!signup); $('#auth-submit').textContent=signup?'Create account':'Sign in'; $('#auth-switch-copy').textContent=signup?'Already have an account?':'New to opix?'; $('#auth-switch').textContent=signup?'Sign in':'Create an account';
-  $('#auth-password').autocomplete=signup?'new-password':'current-password';
+function showConnectError(message) {
+  $('#auth-screen').classList.remove('hidden'); $('#app').classList.add('hidden');
+  $('#auth-title').textContent='Could not connect.';
+  $('#auth-subtitle').textContent='Opix could not start a guest session.';
+  notice(message,'error'); $('#retry-connect').classList.remove('hidden');
 }
-$('#auth-switch').addEventListener('click',()=>showAuth(state.authMode==='signin'?'signup':'signin'));
-$('#auth-form').addEventListener('submit',async e=>{
-  e.preventDefault(); clearNotice();
-  const email=$('#auth-email').value.trim(), password=$('#auth-password').value, display_name=$('#auth-display-name').value.trim();
-  const button=$('#auth-submit'); button.disabled=true;
+async function boot() {
+  if(state.booting || state.user) return;
+  state.booting=true; $('#retry-connect').classList.add('hidden');
+  $('#auth-title').textContent='Connecting to opix…';
+  $('#auth-subtitle').textContent='Getting your chat ready. No signup or login needed.';
   try {
-    if(state.authMode==='signup'){
-      if(display_name.length<1 || display_name.length>32) throw new Error('Display name must be between 1 and 32 characters.');
-      if(password.length<8) throw new Error('Use a password with at least 8 characters.');
-      const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name}}});
+    const {data:{session},error:sessionError}=await supabase.auth.getSession();
+    if(sessionError) throw sessionError;
+    let user=session?.user;
+    if(!user) {
+      const guestName='Guest '+Math.floor(1000+Math.random()*9000);
+      const {data,error}=await supabase.auth.signInAnonymously({options:{data:{display_name:guestName}}});
       if(error) throw error;
-      if(data.session){ await startApp(data.session.user); }
-      else notice('Account created. Check your email to confirm it, then sign in.','success');
-    } else {
-      const {data,error}=await supabase.auth.signInWithPassword({email,password});
-      if(error) throw error;
-      await startApp(data.user);
+      user=data.user;
     }
-  } catch(err){ notice(err.message || 'Something went wrong.'); }
-  finally { button.disabled=false; }
-});
+    await startApp(user);
+  } catch(err) { console.error(err); showConnectError(err.message || 'Could not create a guest session.'); }
+  finally { state.booting=false; }
+}
+$('#retry-connect').addEventListener('click',boot);
 
 async function startApp(user){
   state.user=user;
   $('#auth-screen').classList.add('hidden'); $('#app').classList.remove('hidden');
   await loadProfile();
-  if(!state.profile){ await supabase.auth.signOut(); showAuth('signin'); notice('Your profile is still being created. Try signing in again in a moment.'); return; }
+  if(!state.profile) throw new Error('Your guest profile is still being created. Please try again.');
   $('#side-name').textContent=state.profile.display_name; $('#side-handle').textContent=''; $('#side-avatar').textContent=initials(state.profile.display_name);
   await refreshData();
   subscribeRealtime();
@@ -261,19 +245,18 @@ async function respondRequest(id,status){
   await refreshData();render();
 }
 function renderSettingsPage(){
-  $('#page-content').innerHTML=`<div class="section-head"><div><h2>Settings</h2><p>Your account details.</p></div></div><div class="card settings-grid"><h3>Profile</h3><div class="field"><label>Email</label><input value="${escapeHTML(state.user.email||'')}" disabled></div><form id="profile-form"><div class="field"><label for="settings-display-name">Display name</label><input id="settings-display-name" value="${escapeHTML(state.profile.display_name)}" minlength="1" maxlength="32" required></div><button class="primary" type="submit">Save changes</button></form><div class="notice hidden" id="settings-notice"></div></div><div class="card settings-grid"><h3>Account</h3><p class="muted small">Display name: ${escapeHTML(state.profile.display_name)}.</p><button class="secondary" id="sign-out">Sign out</button></div>`;
-  $('#profile-form').addEventListener('submit',saveProfile);$('#sign-out').onclick=async()=>{if(state.channel)await supabase.removeChannel(state.channel);await supabase.auth.signOut();state.user=null;state.profile=null;state.selected=null;showAuth('signin');};
+  $('#page-content').innerHTML=`<div class="section-head"><div><h2>Settings</h2><p>Your display name.</p></div></div><div class="card settings-grid"><h3>Profile</h3><form id="profile-form"><div class="field"><label for="settings-display-name">Display name</label><input id="settings-display-name" value="${escapeHTML(state.profile.display_name)}" minlength="1" maxlength="32" required></div><button class="primary" type="submit">Save changes</button></form><div class="notice hidden" id="settings-notice"></div><p class="muted small">You're using opix as a guest. Your guest identity is saved in this browser. Clearing browser data may make you lose access to this guest account.</p></div>`;
+  $('#profile-form').addEventListener('submit',saveProfile);
 }
 async function saveProfile(e){
   e.preventDefault();const display_name=$('#settings-display-name').value.trim();const note=$('#settings-notice');note.classList.remove('hidden');note.className='notice';
   if(display_name.length<1 || display_name.length>32){note.textContent='Display name must be between 1 and 32 characters.';return;}
   const {error}=await supabase.from('profiles').update({display_name}).eq('id',state.user.id);
-  if(error){note.className='notice error';note.textContent=error.code==='23505'?'That display_name is already taken.':error.message;return;}
-  state.profile.display_name=display_name;$('#side-name').textContent=display_name;$('#side-handle').textContent='@'+display_name;$('#side-avatar').textContent=initials(display_name);note.className='notice success';note.textContent='Saved.';
+  if(error){note.className='notice error';note.textContent=error.message;return;}
+  state.profile.display_name=display_name;$('#side-name').textContent=display_name;$('#side-handle').textContent='Guest';$('#side-avatar').textContent=initials(display_name);note.className='notice success';note.textContent='Saved.';
 }
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{state.page=b.dataset.page;render();}));
-supabase.auth.getSession().then(({data})=>{if(data.session)startApp(data.session.user).catch(e=>{console.error(e);showAuth('signin');notice(e.message);});else showAuth('signin');});
-supabase.auth.onAuthStateChange((_event,session)=>{if(session&&!state.user){setTimeout(()=>startApp(session.user).catch(e=>{console.error(e);showAuth('signin');notice(e.message);}),0);}});
+boot();
 </script>
 </body>
 </html>
