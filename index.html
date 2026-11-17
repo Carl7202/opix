@@ -41,7 +41,7 @@
 </style>
 </head>
 <body>
-<section id="auth-screen"><div class="auth-card"><div class="brand"><span class="brand-mark">o</span><span>opix</span></div><h1 id="auth-title">Connecting to opix…</h1><p id="auth-subtitle">Getting your chat ready. No signup or login needed.</p><div id="auth-notice" class="notice hidden" role="status"></div><button class="primary wide hidden" id="retry-connect" type="button">Try again</button></div></section>
+<section id="auth-screen"><div class="auth-card"><div class="brand"><span class="brand-mark">o</span><span>opix</span></div><h1>What's your name?</h1><p>Pick a display name and jump straight into the chat.</p><form id="guest-form"><div class="field"><label for="guest-name">Display name</label><input id="guest-name" maxlength="32" minlength="1" autocomplete="nickname" placeholder="e.g. Cosmyx" required autofocus></div><button class="primary wide" id="guest-submit" type="submit">Enter opix →</button></form><div id="auth-notice" class="notice hidden" role="status"></div></div></section>
 
 <section id="app" class="hidden">
   <aside class="sidebar">
@@ -76,32 +76,39 @@ const initials = (name='?') => (name.trim().slice(0,2) || '?').toUpperCase();
 const timeShort = (value) => { if(!value) return ''; const d=new Date(value); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); };
 const online = (lastSeen) => lastSeen && (Date.now()-new Date(lastSeen).getTime()) < 120000;
 function notice(message, kind='') { const el=$('#auth-notice'); el.textContent=message; el.className='notice '+kind; el.classList.remove('hidden'); }
-function showConnectError(message) {
-  $('#auth-screen').classList.remove('hidden'); $('#app').classList.add('hidden');
-  $('#auth-title').textContent='Could not connect.';
-  $('#auth-subtitle').textContent='Opix could not start a guest session.';
-  notice(message,'error'); $('#retry-connect').classList.remove('hidden');
-}
-async function boot() {
-  if(state.booting || state.user) return;
-  state.booting=true; $('#retry-connect').classList.add('hidden');
-  $('#auth-title').textContent='Connecting to opix…';
-  $('#auth-subtitle').textContent='Getting your chat ready. No signup or login needed.';
+$('#guest-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const displayName=$('#guest-name').value.trim();
+  if(!displayName || displayName.length>32){ notice('Choose a name between 1 and 32 characters.','error'); return; }
+  const button=$('#guest-submit'); button.disabled=true; button.textContent='Joining…';
   try {
     const {data:{session},error:sessionError}=await supabase.auth.getSession();
     if(sessionError) throw sessionError;
     let user=session?.user;
-    if(!user) {
-      const guestName='Guest '+Math.floor(1000+Math.random()*9000);
-      const {data,error}=await supabase.auth.signInAnonymously({options:{data:{display_name:guestName}}});
+    if(!user){
+      const {data,error}=await supabase.auth.signInAnonymously({options:{data:{display_name:displayName}}});
       if(error) throw error;
       user=data.user;
     }
+    state.user=user;
+    let profile=null;
+    for(let i=0;i<8&&!profile;i++){
+      const {data,error}=await supabase.from('profiles').select('id,display_name,last_seen').eq('id',user.id).maybeSingle();
+      if(error) throw error;
+      profile=data;
+      if(!profile) await new Promise(resolve=>setTimeout(resolve,250));
+    }
+    if(!profile) throw new Error('Could not create your guest profile. Try again.');
+    const {data:updated,error:updateError}=await supabase.from('profiles').update({display_name:displayName}).eq('id',user.id).select('id,display_name,last_seen').single();
+    if(updateError) throw updateError;
+    state.profile=updated;
     await startApp(user);
-  } catch(err) { console.error(err); showConnectError(err.message || 'Could not create a guest session.'); }
-  finally { state.booting=false; }
-}
-$('#retry-connect').addEventListener('click',boot);
+  } catch(err) {
+    console.error(err); state.user=null;
+    notice(err.message || 'Could not join opix.','error');
+    button.disabled=false; button.textContent='Enter opix →';
+  }
+});
 
 async function startApp(user){
   state.user=user;
